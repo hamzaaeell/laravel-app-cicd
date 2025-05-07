@@ -1,10 +1,49 @@
-name: Hello World Workflow
+name: CI/CD for Laravel App
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  greet:
+  push_to_dockerhub:
     runs-on: ubuntu-latest
     steps:
-      - name: Say hello
-        run: echo "Hello, World!"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+
+  build:
+    needs: push_to_dockerhub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull image from DockerHub
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from DockerHub
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
+
+      - name: Stop old container (if running)
+        run: |
+          docker stop laravel-app || true
+          docker rm laravel-app || true
+
+      - name: Run Laravel container with .env
+        run: |
+          docker run -d \
+            --name laravel-app \
+            -p 8000:80 \
+            -v /home/ubuntu/laravel/.env:/var/www/html/.env \
+            ${{ secrets.DOCKERHUB_USERNAME }}/laravel-app:latest
