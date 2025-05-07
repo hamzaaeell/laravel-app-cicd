@@ -1,0 +1,42 @@
+# Laravel & PHP
+/vendor
+/node_modules
+/.env
+/.env.*.php
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+/storage/*.key
+/storage/*.log
+/storage/framework/cache/data
+/storage/framework/sessions
+/storage/framework/testing
+/storage/framework/views
+/storage/logs
+
+# Laravel specific
+/public/storage
+/public/hot
+/public/mix-manifest.json
+
+# IDEs & editors
+/.vscode
+.idea
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Composer & npm artifacts
+composer.lock
+npm-debug.log
+yarn-error.log
+
+# Docker
+docker-compose.override.yml
+
+# Test coverage
+coverage
+
+# Git
+!.gitignore
